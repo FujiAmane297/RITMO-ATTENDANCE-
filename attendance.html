@@ -1,0 +1,265 @@
+<html>
+<head>
+<meta>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Attendance System</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<nav>
+    <a href="records.html" onclick="showPage('Saved Attendance Records')">
+        Saved Records</a>
+</nav>
+
+<body>
+
+<header>🟣 Attendance System</header>
+
+<div class="container">
+
+<!-- SESSION -->
+<div class="card">
+    <h3>📅 Training Session</h3>
+
+    <input type="date" id="date">
+    <input type="time" id="time">
+
+    <button onclick="createSession()">Create / Switch Session</button>
+
+    <button onclick="deleteCurrentSession()" style="background:red;color:white;">
+    🗑️ Delete Current Session
+    </button>
+
+    <p><b>Active Session:</b></p>
+    <div id="activeSession">None</div>
+</div>
+
+<!-- ATTENDANCE -->
+<div class="card" style="position:relative;">
+    <h3>🔍 Attendance Recording</h3>
+
+    <input type="text" id="search" placeholder="Search member...">
+    <div id="dropdown" class="dropdown"></div>
+
+    <button onclick="markAttendance()">Mark Present</button>
+
+    <button onclick="saveData()" style="background:#4CAF50;color:white;">
+        💾 Save Attendance Record
+    </button>
+</div>
+
+<!-- TABLE -->
+<div class="card">
+    <h3>📊 Attendance Records</h3>
+
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+// MEMBERS
+const members = [
+"Aragon, Erica",
+"Baylon, Pauleen",
+"Balaoro, Yzabelle",
+"De Guzma, Micah",
+"Dela Cruz, Trisha May",
+"Gabucó, Reianne",
+"Malicdem, Riofaith",
+"Rodriguez, Juliana",
+"Atar, Rafy",
+"Aquino, Lance Spencer",
+"Dela Torre, Josh Aaron",
+"Lopez, Lance",
+"Mirabueno, Geoffrey Carl",
+"Mojar, Kris Bedrijo",
+"Yape, Mark",
+"Candaza, Alexandra L.",
+"Balbuena, Arielle Denise M.",
+"Tuyac, Sapphire C.",
+"Buiza, Princess O.",
+"Masangcay, Darlene V.",
+"Escolano, Vinz Ivan",
+"Aisaac Anunciacion",
+"Candaza, MJ",
+"Mercene, Martin Luis",
+"Samioj Uy, Xean",
+"Symon Deniel Susano",
+"Josh Lallabban",
+"Stephen Mone",
+"Meneses, Ivan D.",
+"Rosaros, James S.",
+"Cabrera, Jelo T.",
+"Chan, Jil Sander M.",
+"Ice Gilen Anija",
+"Jun Jr. S. Paulino",
+"Jarvin Laxamana",
+"Exequiel Soriano",
+"Nash Vincent D. Reyes",
+"Ray Tuyac",
+"Nash Salud",
+"Christmark Gutierrez",
+"Lhanz Rallos"
+];
+
+// STORAGE
+let sessions = JSON.parse(localStorage.getItem("attendance_sessions")) || {};
+let currentSessionKey = localStorage.getItem("current_session") || null;
+
+// SAVE
+function saveData() {
+    localStorage.setItem("attendance_sessions", JSON.stringify(sessions));
+    localStorage.setItem("current_session", currentSessionKey);
+}
+
+// SEARCH
+const searchInput = document.getElementById("search");
+const dropdown = document.getElementById("dropdown");
+
+searchInput.addEventListener("input", () => {
+    let value = searchInput.value.toLowerCase();
+    dropdown.innerHTML = "";
+
+    if (!value) return;
+
+    members
+    .filter(n => n.toLowerCase().includes(value))
+    .forEach(name => {
+        let div = document.createElement("div");
+        div.textContent = name;
+        div.onclick = () => {
+            searchInput.value = name;
+            dropdown.innerHTML = "";
+        };
+        dropdown.appendChild(div);
+    });
+});
+
+// SESSION
+function createSession() {
+    let date = document.getElementById("date").value;
+    let time = document.getElementById("time").value;
+
+    if (!date || !time) {
+        alert("Set date and time first!");
+        return;
+    }
+
+    currentSessionKey = `${date} ${time}`;
+
+    if (!sessions[currentSessionKey]) {
+        sessions[currentSessionKey] = {};
+    }
+
+    saveData();
+
+    document.getElementById("activeSession").innerText = currentSessionKey;
+
+    renderTable();
+}
+
+// DELETE SESSION
+function deleteCurrentSession() {
+    if (!currentSessionKey) {
+        alert("No active session!");
+        return;
+    }
+
+    let ok = confirm("Delete this session?\n\n" + currentSessionKey);
+    if (!ok) return;
+
+    delete sessions[currentSessionKey];
+
+    currentSessionKey = null;
+
+    localStorage.setItem("attendance_sessions", JSON.stringify(sessions));
+    localStorage.removeItem("current_session");
+
+    document.getElementById("activeSession").innerText = "None";
+    document.getElementById("tableBody").innerHTML = "";
+
+    alert("Session deleted 🗑️");
+}
+
+// MARK ATTENDANCE
+function markAttendance() {
+    if (!currentSessionKey) {
+        alert("Create session first!");
+        return;
+    }
+
+    let name = searchInput.value;
+    if (!members.includes(name)) {
+        alert("Member not found!");
+        return;
+    }
+
+    let now = new Date();
+    let schedule = new Date(currentSessionKey);
+
+    let status = now > schedule ? "Late" : "Present";
+
+    sessions[currentSessionKey][name] = {
+        status,
+        time: now.toLocaleTimeString()
+    };
+
+    saveData();
+
+    searchInput.value = "";
+    renderTable();
+}
+
+// TABLE
+function renderTable() {
+    let tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    if (!currentSessionKey) return;
+
+    let data = sessions[currentSessionKey];
+
+    members.forEach(name => {
+        let record = data?.[name];
+
+        let status = record?.status || "Absent";
+        let time = record?.time || "-";
+
+        let cls =
+            status === "Late" ? "late" :
+            status === "Present" ? "present" : "absent";
+
+        tbody.innerHTML += `
+        <tr>
+            <td>${name}</td>
+            <td class="${cls}">${status}</td>
+            <td>${time}</td>
+        </tr>`;
+    });
+}
+
+// LOAD
+window.onload = () => {
+    if (currentSessionKey) {
+        document.getElementById("activeSession").innerText = currentSessionKey;
+    }
+    renderTable();
+};
+
+</script>
+
+</body>
+</html>

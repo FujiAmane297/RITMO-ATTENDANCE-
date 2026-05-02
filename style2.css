@@ -1,0 +1,75 @@
+body {
+    font-family: Arial;
+    margin: 0;
+    background: linear-gradient(135deg, #2e0854, #4b0082);
+    color: white;
+}
+
+header {
+    text-align: center;
+    padding: 15px;
+    color: gold;
+    font-size: 22px;
+    font-weight: bold;
+}
+
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 15px;
+}
+
+.card {
+    background: rgba(0,0,0,0.4);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: none;
+    border-radius: 6px;
+    background: gold;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #ffd700;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    color: black;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+th {
+    background: gold;
+}
+
+.present { color: green; font-weight: bold; }
+.late { color: red; font-weight: bold; }
+.absent { color: gray; }
+
+.session-btn {
+    margin-bottom: 5px;
+}
+nav {
+    background: rgba(95, 255, 50, 0.4);
+    padding: 10px;
+    text-align: center;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    max-width: 900px;
+    margin: auto;
+}

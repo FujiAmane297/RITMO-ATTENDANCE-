@@ -1,0 +1,110 @@
+<html>
+<head>
+<meta>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Saved Attendance Records</title>
+<link rel="stylesheet" href="style2.css">
+</head>
+
+<body>
+
+<header>📊 Saved Attendance Records</header>
+
+<div class="container">
+
+<div class="card">
+    <h3>📅 Training Sessions</h3>
+    <div id="sessionList"></div>
+</div>
+
+<div class="card">
+    <h3>📋 Training Details</h3>
+    <div id="sessionTitle">Select a Date</div>
+
+    <div style="overflow-x:auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Status</th>
+                    <th>Time</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+// LOAD DATA
+let sessions = JSON.parse(localStorage.getItem("attendance_sessions")) || {};
+
+// DOM
+const sessionList = document.getElementById("sessionList");
+const tableBody = document.getElementById("tableBody");
+const sessionTitle = document.getElementById("sessionTitle");
+
+// SHOW ALL SESSIONS
+function loadSessions() {
+    sessionList.innerHTML = "";
+
+    let keys = Object.keys(sessions);
+
+    if (keys.length === 0) {
+        sessionList.innerHTML = "<p>No saved records yet.</p>";
+        return;
+    }
+
+    keys.forEach(key => {
+        let btn = document.createElement("button");
+        btn.className = "session-btn";
+        btn.textContent = key;
+
+        btn.onclick = () => showSession(key);
+
+        sessionList.appendChild(btn);
+    });
+}
+
+// SHOW SESSION DATA
+function showSession(key) {
+    sessionTitle.innerText = "Session: " + key;
+
+    let data = sessions[key];
+    tableBody.innerHTML = "";
+
+    for (let name in data) {
+        let record = data[name];
+
+        let status = record.status;
+
+        let cls =
+            status === "Late" ? "late" :
+            status === "Present" ? "present" : "absent";
+
+        tableBody.innerHTML += `
+        <tr>
+            <td>${name}</td>
+            <td class="${cls}">${status}</td>
+            <td>${record.time}</td>
+        </tr>`;
+    }
+}
+
+// INIT
+loadSessions();
+
+</script>
+
+
+<nav>
+    <a href="attendance.html" onclick="showPage('Attendance')">
+        Back to Attendance</a>
+</nav>
+
+
+</body>
+</html>
